@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    image: calvalusmarine/hadoop-namenode:master
     container_name: namenode
     restart: always
     ports:
@@ -16,7 +16,7 @@ services:
       - ./hadoop.env
 
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    image: calvalusmarine/hadoop-datanode:master
     container_name: datanode
     restart: always
     volumes:
@@ -27,16 +27,18 @@ services:
       - ./hadoop.env
   
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    image: calvalusmarine/hadoop-resourcemanager:master
     container_name: resourcemanager
     restart: always
+    ports:
+      - 8088:8088
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
     env_file:
       - ./hadoop.env
 
   nodemanager1:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    image: calvalusmarine/hadoop-nodemanager:master
     container_name: nodemanager
     restart: always
     environment:
@@ -45,17 +47,27 @@ services:
       - ./hadoop.env
   
   historyserver:
-    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    image: calvalusmarine/hadoop-historyserver:master
     container_name: historyserver
     restart: always
+    ports:
+      - 19888:19888
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
-    volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
       - ./hadoop.env
-  
+
+  calvalus-portal:
+    image: calvalusmarine/calvalus-portal:master
+    container_name: calvalus-portal
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    env_file:
+      - ./hadoop.env
+
 volumes:
   hadoop_namenode:
   hadoop_datanode:
-  hadoop_historyserver:
